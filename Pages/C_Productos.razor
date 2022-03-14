@@ -1,0 +1,139 @@
+﻿@page "/C_Productos"
+
+<PageTitle>Consulta productos</PageTitle>
+
+<EditForm Model="lista">
+    <div class="card">
+        <div class="card-header">
+            <h4>Consulta de productos</h4>
+        </div>
+
+        <div class="card-body">
+            <form>
+                <div class="input-group d-flex align-items-end">
+                    <InputSelect class="form-control col-2" @bind-Value="filtro">
+                        <option value="1">ID</option>
+                        <option value="2">Descripcion</option>
+                    </InputSelect>
+
+                    <div class="flex-fill mx-2">
+                        <label>Busqueda</label>
+                        <InputText class="form-control" @bind-Value="Criterio" />
+                    </div>
+
+                  @*   <button type="button" class="btn btn-lg btn-secondary" @onclick="MostrarFecha"><span
+                            class="oi oi-calendar"></span></button> *@
+                    <button type="button" class="btn btn-lg btn-primary" @onclick="Buscar"><span
+                            class="oi oi-magnifying-glass"></span>Buscar</button>
+
+                </div>
+
+              
+                <div class="input-group d-flex align-items-end">
+
+                    <div class="mx-1">
+                        <label>Desde</label>
+                        <input type="date" class="form-control" @bind="fechaDesde" />
+                    </div>
+
+                    <div class="mx-1">
+                        <label>Hasta</label>
+                        <input type="date" class="form-control" @bind="fechaHasta" />
+                    </div>
+
+                </div>
+
+            
+            
+
+
+            </form>
+        </div>
+
+        <table class="table table-light">
+            <thead class="thead">
+                <tr class="table">
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Fecha de vencimiento</th>
+                    <th>Peso</th>
+
+                    <th>Existencia</th>
+                    <th>Costo</th>
+                    <th>Valor Inventario</th>
+                    <th>Precio</th>
+                    <th>Ganancia</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in lista)
+                {
+                    <tr>
+                        <td>@item.ProductoId</td>
+                        <td>@item.Descripcion</td>
+                        <td>@item.FechaDeVencimiento</td>
+                        <td>@item.Peso g</td>
+
+                        <td>@item.Existencia</td>
+                        <td>RD$@item.Costo</td>
+                        <td>RD$@item.ValorInventario</td>
+                        <td>RD$@item.Precio</td>
+                        <td>@item.Ganancia%</td>
+                        <td><a class="btn btn-sm btn-outline-primary oi oi-eye" href="R_Productos/@item.ProductoId"></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+
+
+    </div>
+
+
+
+</EditForm>
+
+@code {
+    public string? filtro { get; set; }
+
+    public string? Criterio { get; set; }
+
+    public DateTime? fechaDesde { get; set; }
+    public DateTime? fechaHasta { get; set; }
+
+    public List<Productos> lista { get; set; } = new List<Productos>();
+
+    [Inject]
+    public ProductosBLL? productosBLL { get; set; }
+    private void Buscar()
+    {
+        if (Criterio != null)
+        {
+            switch (filtro)
+            {
+                case "1":
+                    lista = productosBLL.GetList(p => p.ProductoId == int.Parse(Criterio));
+                    break;
+                case "2":
+                    lista = productosBLL.GetList(p => p.Descripcion.ToLower().Contains(Criterio.ToLower()));
+                    break;
+            }
+
+        }
+        else
+        {
+            lista = productosBLL.GetList(p => true);
+        }
+        
+        if(fechaDesde.HasValue)
+            lista = productosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde);
+        else if(fechaHasta.HasValue)
+            lista = productosBLL.GetList(f =>  f.FechaDeVencimiento.Date <= fechaHasta);
+        else if(fechaDesde.HasValue || fechaHasta.HasValue)
+            lista = productosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde && f.FechaDeVencimiento.Date <= fechaHasta);
+    }
+
+  
+}

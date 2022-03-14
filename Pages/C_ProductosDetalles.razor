@@ -1,0 +1,124 @@
+@page "/C_ProductosDetalles"
+@inject IToastService toast
+
+<PageTitle>Consulta productos por presentacion</PageTitle>
+
+<EditForm Model="producto" >
+    <DataAnnotationsValidator/>
+    <div class = "card">
+
+        <div class="card-header">
+            <h3>Consulta de Producto por Presentacion</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="form-row align-tems-center">
+                <div class="col">
+                    <div class="form-group">
+
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-text">Buscar</span>
+                                    <InputText @bind-Value="criterioBuscar" class="form-control col-4"/>
+                                
+                                    <button type="button" class="btn btn-primary input-group-text"
+                                    @onclick="Buscar"><span class="oi oi-magnifying-glass"> </span></button>  
+                                </div>      
+                            </div>
+                        </div>
+
+                    </div>
+            </div>
+
+               <table class="table table-light">
+                        <thead class="thead">
+                            <tr class="table">
+                                <th>Id</th>
+                                <th>Descripción</th>
+                                <th>Presentación</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                                <th>Disponibles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in producto.ProductosDetalle)
+                            {
+                                <tr>
+                                    <td>@item.ProductoId</td>
+                                    <td>@producto.Descripcion</td>
+                                    <td>@item.Descripcion</td>
+                                    <td>@item.Cantidad</td>
+                                    <td>RD$@item.Precio</td>
+                                    <td>RD$@(@item.Cantidad*@item.Precio)</td>
+                                    <td>@(@producto.Existencia/@item.Cantidad)</td>
+                                </tr>
+                            }
+                        </tbody>
+                </table>
+
+                 <span class="input-group-text">Cantidad de registro: @producto.ProductosDetalle.Count()</span>
+        </div>
+
+    </div>
+</EditForm>
+
+@code{
+
+    public Productos producto {get; set; } = new Productos();
+
+    [Inject]
+    public ProductosBLL productosBLL {get; set;}
+
+    public string criterioBuscar;    
+    public void Buscar()
+    {
+        bool esNumero = Int32.TryParse(criterioBuscar, out int id);
+
+        if(esNumero)
+            producto.ProductoId = Convert.ToInt32(criterioBuscar);
+        else
+            producto.Descripcion = criterioBuscar;
+
+        if(this.producto.ProductoId > 0)
+        {
+            Productos encontrado = productosBLL.Buscar(producto.ProductoId);
+
+            if(encontrado != null)
+            {
+                this.producto = encontrado;
+                toast.ShowSuccess("Producto encontrado. ");
+            }
+            else
+            {
+                Nuevo();
+                toast.ShowError("No se encontró el producto");
+            }
+            producto.ProductosDetalle.Count();
+        }
+        else
+        {
+            Productos encontrado = productosBLL.BuscarDescripcion(producto.Descripcion);
+
+            if(encontrado != null)
+            {
+                this.producto = encontrado;
+                toast.ShowSuccess("Producto encontrado. ");
+            }
+            else
+            {
+                Nuevo();
+                toast.ShowError("No se encontró el producto");
+            }
+
+            producto.ProductosDetalle.Count();
+        }
+    }
+
+    public void Nuevo()
+    {
+        producto = new Productos();
+    }
+}

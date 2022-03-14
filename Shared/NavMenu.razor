@@ -1,0 +1,62 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Pablo_Burgos_Ap1_p2</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-info" aria-hidden="true"></span> Informacion
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="R_Productos">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Registro
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="R_ProductoEmpaques">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Registro de empaque
+            </NavLink>
+        </div> 
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="C_Productos">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Consulta productos
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="C_ProductosDetalles">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Consulta productos detalles
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="C_ProductosEmpaques">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Consulta productos empaques
+            </NavLink>
+        </div>
+        
+        
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
