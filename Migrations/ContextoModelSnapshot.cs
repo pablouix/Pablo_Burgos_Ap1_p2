@@ -98,10 +98,10 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProductosDetallesId")
+                    b.Property<int?>("ProductoId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("_productoProductoId")
+                    b.Property<int>("ProductosDetallesId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("cantidadProducidos")
@@ -112,9 +112,9 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
 
                     b.HasKey("ProductoEmpacadosId");
 
-                    b.HasIndex("ProductosDetallesId");
+                    b.HasIndex("ProductoId");
 
-                    b.HasIndex("_productoProductoId");
+                    b.HasIndex("ProductosDetallesId");
 
                     b.ToTable("ProductosEmpacados");
                 });
@@ -137,19 +137,9 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.Property<int>("ProductoEmpacadosId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("_productoProductoId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("_productosEmpacadosDetalleProductoEmpacadosDetallesId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("ProductoEmpacadosDetallesId");
 
                     b.HasIndex("ProductoEmpacadosId");
-
-                    b.HasIndex("_productoProductoId");
-
-                    b.HasIndex("_productosEmpacadosDetalleProductoEmpacadosDetallesId");
 
                     b.ToTable("ProductosEmpacadosDetalle");
                 });
@@ -165,19 +155,15 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosEmpacados", b =>
                 {
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", "_productosDetalles")
+                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.Productos", null)
+                        .WithMany("ProductosEmpacados")
+                        .HasForeignKey("ProductoId");
+
+                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", null)
                         .WithMany("ProductosEmpacados")
                         .HasForeignKey("ProductosDetallesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.Productos", "_producto")
-                        .WithMany()
-                        .HasForeignKey("_productoProductoId");
-
-                    b.Navigation("_producto");
-
-                    b.Navigation("_productosDetalles");
                 });
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosEmpacadosDetalle", b =>
@@ -187,23 +173,13 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                         .HasForeignKey("ProductoEmpacadosId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.Productos", "_producto")
-                        .WithMany()
-                        .HasForeignKey("_productoProductoId");
-
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.ProductosEmpacadosDetalle", "_productosEmpacadosDetalle")
-                        .WithMany()
-                        .HasForeignKey("_productosEmpacadosDetalleProductoEmpacadosDetallesId");
-
-                    b.Navigation("_producto");
-
-                    b.Navigation("_productosEmpacadosDetalle");
                 });
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.Productos", b =>
                 {
                     b.Navigation("ProductosDetalle");
+
+                    b.Navigation("ProductosEmpacados");
                 });
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", b =>

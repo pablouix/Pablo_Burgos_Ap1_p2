@@ -26,9 +26,6 @@ namespace Pablo_Burgos_Ap1_p2.Entidades
         [Range(0, int.MaxValue, ErrorMessage = "Se debe indicar la cantidad producido debe de estar dentro de los tangos {1}/{2}")]
         public int cantidadProducidos { get; set; }
 
-        public ProductosDetalle? _productosDetalles {get; set;}
-        public Productos? _producto {get; set;}
-
         [ForeignKey("ProductoEmpacadosId")]
         public virtual List<ProductosEmpacadosDetalle> ProductosEmpacadosDetalle { get; set; } = new List<ProductosEmpacadosDetalle>();
     }

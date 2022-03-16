@@ -53,7 +53,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
                     _contexto.Entry(detalle).State = EntityState.Added;
                    // _contexto.Entry(detalle._producto).State = EntityState.Modified;
 
-                    detalle._producto.Existencia -= detalle.Cantidad;
+                    //detalle._producto.Existencia -= detalle.Cantidad;
 
                 }
 
@@ -82,13 +82,13 @@ namespace Pablo_Burgos_Ap1_p2.BLL
 
                 var entradaAnterior = _contexto.ProductosEmpacados.Where(x => x.ProductoEmpacadosId == productosEmpacados.ProductoEmpacadosId)
                 .Include(x => x.ProductosEmpacadosDetalle)
-                .ThenInclude(x => x._producto)
+               // .ThenInclude(x => x._producto)
                 .AsNoTracking()
                 .SingleOrDefault();
 
                 foreach (var detalle in entradaAnterior.ProductosEmpacadosDetalle)
                 {
-                    detalle._producto.Existencia += detalle.Cantidad;
+                    //detalle._producto.Existencia += detalle.Cantidad;
                 }
 
                 var producido = _contexto.Productos.Find(productosEmpacados.ProductoEmpacadosId).Existencia -= productosEmpacados.cantidadProducidos;
@@ -103,9 +103,9 @@ namespace Pablo_Burgos_Ap1_p2.BLL
                 {
 
                     _contexto.Entry(item).State = EntityState.Added;
-                    _contexto.Entry(item._producto).State = EntityState.Modified;
+                    //_contexto.Entry(item._producto).State = EntityState.Modified;
 
-                    item._producto.Existencia -= item.Cantidad;
+                    //item._producto.Existencia -= item.Cantidad;
                 }
 
                 _contexto.Entry(productosEmpacados).State = EntityState.Modified;

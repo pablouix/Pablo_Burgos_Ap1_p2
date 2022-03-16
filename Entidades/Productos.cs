@@ -38,5 +38,8 @@ namespace Pablo_Burgos_Ap1_p2.Entidades
 
         [ForeignKey("ProductoId")]
         public virtual List<ProductosDetalle> ProductosDetalle { get; set; } = new List<ProductosDetalle>();
+
+        [ForeignKey("ProductoId")]
+        public ICollection<ProductosEmpacados> ProductosEmpacados { get; set; } 
     }
 }

@@ -15,11 +15,11 @@ namespace Pablo_Burgos_Ap1_p2.DAL
 
         public Contexto(DbContextOptions<Contexto> options) : base(options) { }
 
-
+        /* 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Productos>().Property(m => m.Descripcion);
             base.OnModelCreating(modelBuilder);
-        } 
+        }  */
     }
 }

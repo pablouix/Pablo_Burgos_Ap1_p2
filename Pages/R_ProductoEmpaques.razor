@@ -134,9 +134,9 @@
 
                                 <option value="0" disabled selected>Seleccione un producido</option>
                                 
-                                @foreach (var item in  productosBLL.GetListaDetalle())
+                                @foreach (var item in  productosBLL.GetListaProductos())
                                 {
-                                    <option value="@item.ProductosDetallesId" >@item.Descripcion
+                                    <option value="@item.ProductoId" >@item.Descripcion
                                     </option>
                                 } 
 
@@ -217,8 +217,8 @@
 
     public void Buscar()
     {
-        if(this.ProductoEmpacadosId > 0)
-        {
+        //if(this.ProductoEmpacadosId > 0)
+        //{
             ProductosEmpacados encontrado = productosEmpacadosBLL.Buscar(this.ProductosEmpacados.ProductoEmpacadosId);
 
             if(encontrado != null)
@@ -231,7 +231,7 @@
                 ProductosEmpacados = new ProductosEmpacados();
                 toast.ShowError("No se encontró el producto empacado");
             }
-        } 
+        //} 
 
     }
 

@@ -63,14 +63,14 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     Concepto = table.Column<string>(type: "TEXT", maxLength: 35, nullable: false),
                     cantidadUtilizados = table.Column<int>(type: "INTEGER", nullable: false),
                     cantidadProducidos = table.Column<int>(type: "INTEGER", nullable: false),
-                    _productoProductoId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ProductoId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductosEmpacados", x => x.ProductoEmpacadosId);
                     table.ForeignKey(
-                        name: "FK_ProductosEmpacados_Productos__productoProductoId",
-                        column: x => x._productoProductoId,
+                        name: "FK_ProductosEmpacados_Productos_ProductoId",
+                        column: x => x.ProductoId,
                         principalTable: "Productos",
                         principalColumn: "ProductoId");
                     table.ForeignKey(
@@ -90,29 +90,17 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     ProductoEmpacadosId = table.Column<int>(type: "INTEGER", nullable: false),
                     Descripcion = table.Column<string>(type: "TEXT", nullable: true),
                     Cantidad = table.Column<int>(type: "INTEGER", nullable: false),
-                    Peso = table.Column<float>(type: "REAL", nullable: false),
-                    _productoProductoId = table.Column<int>(type: "INTEGER", nullable: true),
-                    _productosEmpacadosDetalleProductoEmpacadosDetallesId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Peso = table.Column<float>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductosEmpacadosDetalle", x => x.ProductoEmpacadosDetallesId);
-                    table.ForeignKey(
-                        name: "FK_ProductosEmpacadosDetalle_Productos__productoProductoId",
-                        column: x => x._productoProductoId,
-                        principalTable: "Productos",
-                        principalColumn: "ProductoId");
                     table.ForeignKey(
                         name: "FK_ProductosEmpacadosDetalle_ProductosEmpacados_ProductoEmpacadosId",
                         column: x => x.ProductoEmpacadosId,
                         principalTable: "ProductosEmpacados",
                         principalColumn: "ProductoEmpacadosId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProductosEmpacadosDetalle_ProductosEmpacadosDetalle__productosEmpacadosDetalleProductoEmpacadosDetallesId",
-                        column: x => x._productosEmpacadosDetalleProductoEmpacadosDetallesId,
-                        principalTable: "ProductosEmpacadosDetalle",
-                        principalColumn: "ProductoEmpacadosDetallesId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -121,24 +109,14 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                 column: "ProductoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductosEmpacados__productoProductoId",
+                name: "IX_ProductosEmpacados_ProductoId",
                 table: "ProductosEmpacados",
-                column: "_productoProductoId");
+                column: "ProductoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductosEmpacados_ProductosDetallesId",
                 table: "ProductosEmpacados",
                 column: "ProductosDetallesId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductosEmpacadosDetalle__productoProductoId",
-                table: "ProductosEmpacadosDetalle",
-                column: "_productoProductoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductosEmpacadosDetalle__productosEmpacadosDetalleProductoEmpacadosDetallesId",
-                table: "ProductosEmpacadosDetalle",
-                column: "_productosEmpacadosDetalleProductoEmpacadosDetallesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductosEmpacadosDetalle_ProductoEmpacadosId",
