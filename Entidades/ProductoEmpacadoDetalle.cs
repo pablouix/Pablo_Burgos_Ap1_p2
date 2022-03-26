@@ -8,13 +8,18 @@ namespace Pablo_Burgos_Ap1_p2.Entidades
         public int ProductoEmpacadosDetallesId {get; set;}
         public int ProductoEmpacadosId {set; get;}
 
-        public string? Descripcion {set; get;}
+
+        public int IdProducto {set; get;}
+        public string? Concepto {set; get;}
         public int Cantidad {set; get; }
         public float Peso {set; get; }
+
+
         
-        public ProductosEmpacadosDetalle(string descripcion, int cantidad, float peso)
+        public ProductosEmpacadosDetalle(int id, string concepto, int cantidad, float peso)
         {
-            Descripcion = descripcion;
+            IdProducto = id;
+            Concepto = concepto;
             Cantidad = cantidad;
             Peso = peso;
         }

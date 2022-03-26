@@ -10,8 +10,8 @@ namespace Pablo_Burgos_Ap1_p2.Entidades
 
         [Required(ErrorMessage = "Campo obligatorio. Se debe indicar descripción. ")]
         [MinLength(3, ErrorMessage = "La descripción debe tener almenos {1} caracteres.")]
-        [MaxLength(35, ErrorMessage = "La descripción no debe pasar de {1} caracteres. ")]
-        public string? Descripcion { get; set; }
+        [MaxLength(40, ErrorMessage = "La descripción no debe pasar de {1} caracteres. ")]
+        public string Descripcion { get; set; }
 
         [Required(ErrorMessage = "Campo obligatorio. poner fecha de vencimiento.")]
         public DateTime FechaDeVencimiento { get; set; } = DateTime.Now;
@@ -37,9 +37,6 @@ namespace Pablo_Burgos_Ap1_p2.Entidades
         public float PesoTotal {get; set; }
 
         [ForeignKey("ProductoId")]
-        public virtual List<ProductosDetalle> ProductosDetalle { get; set; } = new List<ProductosDetalle>();
-
-        [ForeignKey("ProductoId")]
-        public ICollection<ProductosEmpacados> ProductosEmpacados { get; set; } 
+        public virtual List<ProductosDetalles> ProductosDetalles { get; set; } = new List<ProductosDetalles>();
     }
 }

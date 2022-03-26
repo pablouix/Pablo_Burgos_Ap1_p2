@@ -12,7 +12,8 @@
             <form>
                 <div class="input-group d-flex align-items-end">
                     <InputSelect class="form-control col-2" @bind-Value="filtro">
-                        <option value="1">ID</option>
+                        <option value="0" disabled selected>Seleccione un filtro</option>
+                        <option value="1">Id</option>
                         <option value="2">Descripcion</option>
                     </InputSelect>
 
@@ -21,13 +22,10 @@
                         <InputText class="form-control" @bind-Value="Criterio" />
                     </div>
 
-                  @*   <button type="button" class="btn btn-lg btn-secondary" @onclick="MostrarFecha"><span
-                            class="oi oi-calendar"></span></button> *@
-                    <button type="button" class="btn btn-lg btn-primary" @onclick="Buscar"><span
-                            class="oi oi-magnifying-glass"></span>Buscar</button>
+                    <button type="button" class="btn btn-primary" @onclick="Buscar"><span
+                            class="oi oi-magnifying-glass"></span></button>
 
                 </div>
-
               
                 <div class="input-group d-flex align-items-end">
 
@@ -42,11 +40,6 @@
                     </div>
 
                 </div>
-
-            
-            
-
-
             </form>
         </div>
 
@@ -73,7 +66,6 @@
                         <td>@item.Descripcion</td>
                         <td>@item.FechaDeVencimiento</td>
                         <td>@item.Peso g</td>
-
                         <td>@item.Existencia</td>
                         <td>RD$@item.Costo</td>
                         <td>RD$@item.ValorInventario</td>
@@ -107,32 +99,46 @@
 
     [Inject]
     public ProductosBLL? productosBLL { get; set; }
+  
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lista = ProductosBLL.GetList(p => true);
+    } 
+  
+     
     private void Buscar()
     {
         if (Criterio != null)
         {
+           
             switch (filtro)
             {
                 case "1":
-                    lista = productosBLL.GetList(p => p.ProductoId == int.Parse(Criterio));
+                    bool esNumero = Int32.TryParse(Convert.ToString(Criterio), out int id);
+                    if(esNumero)
+                            lista = ProductosBLL.GetList(p => p.ProductoId == id);
+                    else
+                        lista = ProductosBLL.GetList(p => true);
                     break;
+                
                 case "2":
-                    lista = productosBLL.GetList(p => p.Descripcion.ToLower().Contains(Criterio.ToLower()));
+                    lista = ProductosBLL.GetList(p => p.Descripcion.ToLower().Contains(Criterio.ToLower()));
                     break;
             }
 
         }
         else
         {
-            lista = productosBLL.GetList(p => true);
+            lista = ProductosBLL.GetList(p => true);
         }
         
         if(fechaDesde.HasValue)
-            lista = productosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde);
+            lista = ProductosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde);
         else if(fechaHasta.HasValue)
-            lista = productosBLL.GetList(f =>  f.FechaDeVencimiento.Date <= fechaHasta);
+            lista = ProductosBLL.GetList(f =>  f.FechaDeVencimiento.Date <= fechaHasta);
         else if(fechaDesde.HasValue || fechaHasta.HasValue)
-            lista = productosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde && f.FechaDeVencimiento.Date <= fechaHasta);
+            lista = ProductosBLL.GetList(f => f.FechaDeVencimiento.Date >= fechaDesde && f.FechaDeVencimiento.Date <= fechaHasta);
     }
 
   

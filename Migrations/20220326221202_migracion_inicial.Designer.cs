@@ -11,8 +11,8 @@ using Pablo_Burgos_Ap1_p2.DAL;
 namespace Pablo_Burgos_Ap1_p2.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20220316205126_migracion_incial")]
-    partial class migracion_incial
+    [Migration("20220326221202_migracion_inicial")]
+    partial class migracion_inicial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,7 +30,7 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasMaxLength(35)
+                        .HasMaxLength(40)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Existencia")
@@ -59,7 +59,7 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.ToTable("Productos");
                 });
 
-            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", b =>
+            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalles", b =>
                 {
                     b.Property<int>("ProductosDetallesId")
                         .ValueGeneratedOnAdd()
@@ -68,13 +68,11 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(35)
-                        .HasColumnType("TEXT");
-
                     b.Property<float>("Precio")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("Presentacion")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("INTEGER");
@@ -100,10 +98,7 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ProductoId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ProductosDetallesId")
+                    b.Property<int>("IdProducidos")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("cantidadProducidos")
@@ -113,10 +108,6 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ProductoEmpacadosId");
-
-                    b.HasIndex("ProductoId");
-
-                    b.HasIndex("ProductosDetallesId");
 
                     b.ToTable("ProductosEmpacados");
                 });
@@ -130,8 +121,11 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Descripcion")
+                    b.Property<string>("Concepto")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("IdProducto")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("Peso")
                         .HasColumnType("REAL");
@@ -146,24 +140,11 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
                     b.ToTable("ProductosEmpacadosDetalle");
                 });
 
-            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", b =>
+            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalles", b =>
                 {
                     b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.Productos", null)
-                        .WithMany("ProductosDetalle")
+                        .WithMany("ProductosDetalles")
                         .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosEmpacados", b =>
-                {
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.Productos", null)
-                        .WithMany("ProductosEmpacados")
-                        .HasForeignKey("ProductoId");
-
-                    b.HasOne("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", null)
-                        .WithMany("ProductosEmpacados")
-                        .HasForeignKey("ProductosDetallesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -179,14 +160,7 @@ namespace Pablo_Burgos_Ap1_p2.Migrations
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.Productos", b =>
                 {
-                    b.Navigation("ProductosDetalle");
-
-                    b.Navigation("ProductosEmpacados");
-                });
-
-            modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosDetalle", b =>
-                {
-                    b.Navigation("ProductosEmpacados");
+                    b.Navigation("ProductosDetalles");
                 });
 
             modelBuilder.Entity("Pablo_Burgos_Ap1_p2.Entidades.ProductosEmpacados", b =>

@@ -44,12 +44,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in producto.ProductosDetalle)
+                            @foreach (var item in producto.ProductosDetalles)
                             {
                                 <tr>
                                     <td>@item.ProductoId</td>
                                     <td>@producto.Descripcion</td>
-                                    <td>@item.Descripcion</td>
+                                    <td>@item.Presentacion</td>
                                     <td>@item.Cantidad</td>
                                     <td>RD$@item.Precio</td>
                                     <td>RD$@(@item.Cantidad*@item.Precio)</td>
@@ -59,7 +59,7 @@
                         </tbody>
                 </table>
 
-                 <span class="input-group-text">Cantidad de registro: @producto.ProductosDetalle.Count()</span>
+                 <span class="input-group-text">Cantidad de registro: @producto.ProductosDetalles.Count()</span>
         </div>
 
     </div>
@@ -84,7 +84,7 @@
 
         if(this.producto.ProductoId > 0)
         {
-            Productos encontrado = productosBLL.Buscar(producto.ProductoId);
+            Productos encontrado = ProductosBLL.Buscar(producto.ProductoId);
 
             if(encontrado != null)
             {
@@ -96,11 +96,11 @@
                 Nuevo();
                 toast.ShowError("No se encontró el producto");
             }
-            producto.ProductosDetalle.Count();
+            producto.ProductosDetalles.Count();
         }
         else
         {
-            Productos encontrado = productosBLL.BuscarDescripcion(producto.Descripcion);
+            Productos encontrado = ProductosBLL.BuscarDescripcion(producto.Descripcion);
 
             if(encontrado != null)
             {
@@ -113,7 +113,7 @@
                 toast.ShowError("No se encontró el producto");
             }
 
-            producto.ProductosDetalle.Count();
+            producto.ProductosDetalles.Count();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿@page "/R_ProductoEmpaques"
+@page "/R_ProductoEmpaques/{ProductoEmpacadosId:int}"
 @inject IToastService toast
 <PageTitle>Productos empaques</PageTitle>
 
@@ -19,15 +20,12 @@
                         <label for="exampleFormControlInput1" class="form-label">Id</label>
                         <div class="col-auto">
                            
-                            <InputNumber @bind-Value="ProductosEmpacados.ProductoEmpacadosId" class="form-control col-4" />
-                            <ValidationMessage For="@(() => ProductosEmpacados.ProductoEmpacadosId)" />
-
+                            <InputNumber @bind-Value="ProductoEmpacadosId" class="form-control col-4" />
+                         
                         </div>
                         <div class="col-auto">
                             <button type="button" @onclick="Buscar" class="btn btn-primary mb-3"><span class="oi oi-magnifying-glass"></span></button>
                         </div>
-
-
 
                         @* Fecha *@
                         <label for="exampleFormControlInput1" class="form-label">Fecha actual</label>
@@ -63,17 +61,10 @@
 
                                 <option value="0" disabled selected>Seleccione un producto</option>
 
-                                @foreach (var item in  productosBLL.GetListaProductos()) 
+                                @foreach (var item in  ProductosBLL.GetListaProductos()) 
                                 {
-                                    <option value="@item.ProductoId" >@item.Descripcion
-                                       
-                                    </option> 
-
-                                    Descripcion = @item.Descripcion;
-                                    Peso = @item.Peso*@Cantidad;
+                                    <option value="@item.ProductoId" >@item.Descripcion</option> 
                                 } 
-
-                                
                             </InputSelect> 
 
                             @* Cantidad *@
@@ -105,7 +96,7 @@
                                         {
                                             <tr>
                                               
-                                                <td>@item.Descripcion</td>
+                                                <td>@item.Concepto</td>
                                                 <td>@item.Cantidad</td>
                                                 <td>@item.Peso g</td>
                                                 <td><span class="btn btn-lg btn-danger oi oi-ban" href="#"  @onclick="@(() => RemoverFila(item))"> </span> </td>
@@ -114,7 +105,7 @@
                                     </tbody>
                                 </table>
 
-                                <span class="input-group-text">Peso total: @ProductosEmpacados.ProductosEmpacadosDetalle.Sum(p => p.Peso)</span> 
+                                <span class="input-group-text">Peso total: @ProductosEmpacados.ProductosEmpacadosDetalle.Sum(p => p.Peso*p.Cantidad)</span> 
                             </div>
                 </div>
 
@@ -130,14 +121,13 @@
 
                     <form>
                         <div class="input-group d-flex align-items-end">
-                            <InputSelect class="form-control col-2 mb-3" @bind-Value="filtroProduccidos"> @* ._producto.ProductoId *@
+                            <InputSelect class="form-control col-2 mb-3" @bind-Value="filtroProducidos"> @* ._producto.ProductoId *@
 
                                 <option value="0" disabled selected>Seleccione un producido</option>
                                 
-                                @foreach (var item in  productosBLL.GetListaProductos())
+                                @foreach (var item in  ProductosBLL.GetListaProductos())
                                 {
-                                    <option value="@item.ProductoId" >@item.Descripcion
-                                    </option>
+                                    <option value="@item.ProductoId" >@item.Descripcion </option>
                                 } 
 
                             </InputSelect>  
@@ -183,10 +173,10 @@
     [Parameter]
     public int ProductoEmpacadosId {get; set;}
     public string filtroUtilizados { get; set; }
-    public string filtroProduccidos { get; set; }
+    public string filtroProducidos { get; set; }
+    public int ContarExistencia { get; set; }
 
     public ProductosEmpacados ProductosEmpacados {get; set; } = new ProductosEmpacados();
-    public ProductosEmpacadosDetalle ProductosEmpacadosDetalle {get; set; } = new ProductosEmpacadosDetalle();
 
     [Inject]  
     public ProductosEmpacadosBLL? productosEmpacadosBLL {get; set;}
@@ -195,19 +185,43 @@
     public ProductosBLL? productosBLL { get; set; }
    
 
-        protected override void OnInitialized()
-        {
-            ProductosEmpacados.ProductoEmpacadosId = ProductoEmpacadosId;
-            base.OnInitialized();
-        }
+    protected override void OnInitialized()
+    {
+        ProductosEmpacados.ProductoEmpacadosId = ProductoEmpacadosId;
+        Buscar();
+    }
     
     public string Descripcion { get; set; }
     public int Cantidad {get; set; }    
     public float Peso {get; set; }
+    public int IdProducto {get; set;}
+
+
 
     private void AgregarDetalleEmpaques()
     {
-        ProductosEmpacados.ProductosEmpacadosDetalle.Add(new ProductosEmpacadosDetalle(Descripcion, Cantidad, Peso));
+
+        foreach(var item in ProductosBLL.GetListaProductos())
+        {
+            //poner restrincion si el producto es menor que 0
+            // poner restrincion de productos y existencia
+            if(filtroUtilizados == Convert.ToString(item.ProductoId))
+            {
+                if(item.Existencia>=Cantidad && item.Existencia != 0)
+                {
+                    Descripcion = item.Descripcion;
+                    Peso = item.Peso;
+                    IdProducto = item.ProductoId;
+                    ProductosEmpacados.ProductosEmpacadosDetalle.Add(new ProductosEmpacadosDetalle(IdProducto, Descripcion, Cantidad, Peso));
+                    //contar existencia
+                    //ContarExistencia -= Cantidad;
+                }
+                else
+                {
+                    toast.ShowError("No existe esa cantidad de producto.");
+                }
+            }
+        }
     }
 
     private void RemoverFila(ProductosEmpacadosDetalle item)
@@ -217,52 +231,74 @@
 
     public void Buscar()
     {
-        //if(this.ProductoEmpacadosId > 0)
-        //{
-            ProductosEmpacados encontrado = productosEmpacadosBLL.Buscar(this.ProductosEmpacados.ProductoEmpacadosId);
+        if(ProductoEmpacadosId> 0)
+        {
+            ProductosEmpacados encontrado = ProductosEmpacadosBLL.Buscar(this.ProductoEmpacadosId);
 
             if(encontrado != null)
             {
-               this.ProductosEmpacados = encontrado;
-               toast.ShowSuccess("Producto empacado encontrado. ");
+                this.ProductosEmpacados = encontrado;
+                filtroProducidos = Convert.ToString(ProductosEmpacados.IdProducidos);
+                toast.ShowSuccess("Producto empacado encontrado. ");
             }
             else
             {
                 ProductosEmpacados = new ProductosEmpacados();
                 toast.ShowError("No se encontró el producto empacado");
             }
-        //} 
-
+        }
+        else
+        {
+            Nuevo();
+        }
     }
 
     public void Nuevo()
     {
-        ProductosEmpacados = new ProductosEmpacados();
-        ProductosEmpacadosDetalle = new ProductosEmpacadosDetalle();
+        
+        this.ProductosEmpacados = new ProductosEmpacados();
+        this.ProductoEmpacadosId = 0;
+        this.ProductosEmpacados.ProductosEmpacadosDetalle = new List<ProductosEmpacadosDetalle>();
         Descripcion = "";
         Cantidad = 0; 
         Peso = 0;
+        IdProducto = 0;
+    }
+
+    public void DatosFaltantes()
+    {
+        foreach(var item in ProductosBLL.GetListaProductos())
+        {
+            if(filtroProducidos == Convert.ToString(item.ProductoId))
+            {
+                ProductosEmpacados.IdProducidos = item.ProductoId; 
+            }
+        }
+
+        foreach(var item in ProductosEmpacados.ProductosEmpacadosDetalle)
+        {
+            ProductosEmpacados.cantidadUtilizados += item.Cantidad;
+        }
     }
 
     public void Guardar()
     {
-        if(productosEmpacadosBLL.Guardar(this.ProductosEmpacados))
-        {
-           
-            toast.ShowInfo("Se guardo exitosamente.");
-            Nuevo();
-        }
-        else
-        {
-            toast.ShowError("No se pudo guardar.");
-            Nuevo();
-        }
-
+        DatosFaltantes();
+        if(ProductosEmpacados.Concepto != null)
+            if(ProductosEmpacadosBLL.Guardar(this.ProductosEmpacados))
+            {
+                //contarExistencia = 0;
+                toast.ShowInfo("Se guardo exitosamente.");
+            }
+            else
+            {
+                toast.ShowError("No se pudo guardar."); 
+            }
     }
 
     public void Eliminar()
     {
-        bool elimnado = productosEmpacadosBLL.Eliminar(this.ProductosEmpacados.ProductoEmpacadosId);
+        bool elimnado = ProductosEmpacadosBLL.Eliminar(this.ProductosEmpacados.ProductoEmpacadosId);
         if(elimnado)
         {
             Nuevo();

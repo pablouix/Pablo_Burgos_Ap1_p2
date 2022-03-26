@@ -23,7 +23,7 @@
                         <div class="form-group">
                             <label>Producto Id</label>
                             <div class="input-group">
-                                <InputNumber @bind-Value="producto.ProductoId" class="form-control col-4" />
+                                <InputNumber @bind-Value="ProductoId" class="form-control col-4" />
                                 <div class="input-group-append">
                                     <button type="button" class="btn btn-primary input-group-text"
                                         @onclick="Buscar"><span class="oi oi-magnifying-glass"/></button>
@@ -33,12 +33,14 @@
                     </div>
                 </div>
 
-                 @* Descripcion *@
+                 @* Descripcion     *@
                 <div class="form-group mb-3">
                     <label> Descripci&oacute;n </label>
                     <InputText class="form-control" @bind-Value="producto.Descripcion" />
                     <ValidationMessage For="@(() => producto.Descripcion)" />
                 </div>
+
+            
 
                 @* Fecha de vencimiento *@
                 <div class="form-group mb-3">
@@ -99,7 +101,6 @@
                 <div class="form-group mb-3">
                     <label>Precio </label>
                     <InputNumber readonly class="form-control" @bind-Value="producto.Precio" />
-                    <ValidationMessage For="@(() => producto.Precio)" />
                 </div>
 
           
@@ -118,6 +119,8 @@
                             <div class="form-group">
 
                                 <form class="row g-3 mb-3">
+
+                                    
                                     <div class="col-auto">
                                          <label>Presentaci&oacute;n</label>
                                         <InputText class="form-control" @bind-Value="Presentacion" />
@@ -129,6 +132,7 @@
                                     <div class="col-auto">
                                         <label>Precio</label>
                                         <InputNumber class="form-control" @bind-Value="Precio" readonly/>
+                                     
                                     </div>
                                     
                                   
@@ -158,10 +162,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in producto.ProductosDetalle)
+                            @foreach (var item in producto.ProductosDetalles)
                             {
                                 <tr>
-                                    <td>@item.Descripcion</td>
+                                    <td>@item.Presentacion</td>
                                     <td>@item.Cantidad</td>
                                     <td>RD$@item.Precio</td>
                                     <td><span class="btn btn-lg btn-danger oi oi-ban" href="#"  @onclick="@(() => RemoverFila(item))"> </span> </td>
@@ -180,11 +184,14 @@
                 <div class="card-header">
                     <div class="form-group text-center">
                         <button type="button" class="btn btn-lg btn-primary"
-                        @onclick="Nuevo">Nuevo</button>
+                            @onclick="Nuevo"><span class="oi oi-plus"></span> Nuevo</button>
+
                         <button type="submit"  class="btn btn-lg btn-success"
-                        @onclick="Guardar">Guardar</button>
+                            @onclick="Guardar"><span class="oi oi-media-stop"></span> Guardar</button>
+                            
                         <button type="button" class="btn btn-lg btn-danger"
-                        @onclick="Eliminar">Eliminar</button>
+                            @onclick="Eliminar"> <span class="oi oi-x"></span> Eliminar</button> 
+
                     </div>
                   
                 </div>
@@ -199,27 +206,29 @@
     [Parameter]
     public int ProductoId {get; set;}
     public Productos producto {get; set; } = new Productos();
-    public ProductosDetalle productosDetalle {get; set; } = new ProductosDetalle();
-
+    
     [Inject]
-    public ProductosBLL? productosBLL {get; set;}
+    public ProductosBLL productosBLL {get; set;}
     public string? Presentacion {get; set; }
     public int Cantidad {get; set;}
     public float Precio {set; get;}
 
-
     protected override void OnInitialized()
     {
-       
+        base.OnInitialized();   
         producto.ProductoId = ProductoId;
         Buscar();
+        CalcularGanancia();
+        CalcularValorExistencia();
+        CalcularPesoTotal();
+        CalcularPrecioDetalle();
     } 
 
     public void Buscar()
     {
-        if(this.producto.ProductoId > 0)
+        if(ProductoId > 0)
         {
-            Productos encontrado = productosBLL.Buscar(this.producto.ProductoId);
+            Productos encontrado = ProductosBLL.Buscar(ProductoId);
 
             if(encontrado != null)
             {
@@ -228,9 +237,14 @@
             }
             else
             {
-                producto = new Productos();
+                this.producto = new Productos();
                 toast.ShowError("No se encontró el producto");
+                
             }
+        }
+        else
+        {
+            Nuevo();
         }
     }
 
@@ -249,6 +263,7 @@
     {
         producto.PesoTotal = producto.Peso * producto.Existencia;
     }
+
     public void CalcularPrecioDetalle()
     {
         Precio = Cantidad*producto.Precio;
@@ -256,12 +271,20 @@
 
     private void AgregarDetalle()
     {
-        this.producto.ProductosDetalle.Add(new ProductosDetalle(Presentacion, Cantidad, Precio));
+        if(string.IsNullOrWhiteSpace(Presentacion))
+            toast.ShowError("Falta presentación de producto.");
+        else if(Cantidad == 0)
+            toast.ShowError("Falto cantidad de producto.");
+        else if(Cantidad <= 0)
+            toast.ShowError("La cantidad no puede ser negativa.");
+        else
+            this.producto.ProductosDetalles.Add(new ProductosDetalles(Presentacion, Cantidad, Precio));
+
     }
 
-    private void RemoverFila(ProductosDetalle item)
+    private void RemoverFila(ProductosDetalles item)
     {
-        this.producto.ProductosDetalle.Remove(item);
+        this.producto.ProductosDetalles.Remove(item);
     }
 
     public void Nuevo()
@@ -269,29 +292,30 @@
         Presentacion =""; 
         Cantidad = 0;
         Precio = 0;
-        productosDetalle = new ProductosDetalle();
-        producto = new Productos();
+        this.producto = new Productos();
+        this.ProductoId = 0;
+        this.producto.ProductosDetalles = new List<ProductosDetalles>();
     }
 
     public void Guardar()
     {
-     
-        if(productosBLL.Guardar(this.producto))
+        if(producto.Descripcion != null)
         {
-           
-            toast.ShowInfo("Se guardo exitosamente.");
-            Nuevo();
+            if(ProductosBLL.Guardar(this.producto))
+            {
+                toast.ShowInfo("Se guardo exitosamente.");
+            }
+            else
+            {
+                toast.ShowError("No se pudo guardar.");
+            }
         }
-        else
-        {
-            toast.ShowError("No se pudo guardar.");
-            Nuevo();
-        }
+        
     }
 
     private void Eliminar()
     {
-        bool elimnado = productosBLL.Eliminar(this.producto.ProductoId);
+        bool elimnado = ProductosBLL.Eliminar(this.producto.ProductoId);
         if(elimnado)
         {
             Nuevo();

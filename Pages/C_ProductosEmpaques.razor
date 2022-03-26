@@ -12,6 +12,7 @@
             <form>
                 <div class="input-group d-flex align-items-end">
                     <InputSelect class="form-control col-2" @bind-Value="filtro">
+                        <option value="0" disabled selected>Seleccione un filtro</option>
                         <option value="1">Id</option>
                         <option value="2">Concepto</option>
                     </InputSelect>
@@ -19,12 +20,11 @@
                     <div class="flex-fill mx-2">
                         <label>Busqueda</label>
                         <InputText class="form-control" @bind-Value="Criterio" />
+                
                     </div>
 
-                   @*  <button type="button" class="btn btn-lg btn-secondary" @onclick="MostrarFecha"><span
-                            class="oi oi-calendar"></span></button> *@
-                    <button type="button" class="btn btn-lg btn-primary" @onclick="Buscar"><span
-                            class="oi oi-magnifying-glass"></span>Buscar</button>
+                    <button type="button" class="btn btn-primary" @onclick="Buscar"> <span
+                            class="oi oi-magnifying-glass"></span></button>
 
                 </div>
 
@@ -51,7 +51,7 @@
                     <th>Id</th>
                     <th>Concepto</th>
                     <th>Fecha de creacion</th>
-                    <th>Peso total</th>
+               
                     <th>Cantidad utilizados</th>
                     <th>Cantidad producido</th>
                    
@@ -64,21 +64,16 @@
                         <td>@item.ProductoEmpacadosId</td>
                         <td>@item.Concepto</td>
                         <td>@item.FechaCreacion</td>
-                        <td>@item.ProductosDetallesId </td>
                         <td>@item.cantidadUtilizados</td>
                         <td>@item.cantidadProducidos</td>
+                        <a class="btn btn-sm btn-outline-primary oi oi-eye" href="R_ProductoEmpaques/@item.ProductoEmpacadosId"></a>
                        
                     </tr>
                 }
             </tbody>
 
         </table>
-
-
-
     </div>
-
-
 
 </EditForm>
 
@@ -96,6 +91,12 @@
 
     [Inject]
     public ProductosEmpacadosBLL productosEmpacadosBLL { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lista = ProductosEmpacadosBLL.GetList(p => true);
+    } 
     private void Buscar()
     {
         if (Criterio != null)
@@ -103,24 +104,29 @@
             switch (filtro)
             {
                 case "1":
-                    lista = productosEmpacadosBLL.GetList(p => p.ProductoEmpacadosId == int.Parse(Criterio));
+                    bool esNumero = Int32.TryParse(Convert.ToString(Criterio), out int id);
+                    if(esNumero)
+                        lista = ProductosEmpacadosBLL.GetList(p => p.ProductoEmpacadosId == id);
+                    else
+                        lista = ProductosEmpacadosBLL.GetList(p => true);
                     break;
+                    
                 case "2":
-                    lista = productosEmpacadosBLL.GetList(p => p.Concepto.ToLower().Contains(Criterio.ToLower()));
+                    lista = ProductosEmpacadosBLL.GetList(p => p.Concepto.ToLower().Contains(Criterio.ToLower()));
                     break;
             }
         }
         else
         {
-            lista = productosEmpacadosBLL.GetList(p => true);
+            lista = ProductosEmpacadosBLL.GetList(p => true);
         }
 
         if(fechaDesde.HasValue)
-            lista = productosEmpacadosBLL.GetList(f => f.FechaCreacion.Date >= fechaDesde);
+            lista = ProductosEmpacadosBLL.GetList(f => f.FechaCreacion.Date >= fechaDesde);
         else if(fechaHasta.HasValue)
-            lista = productosEmpacadosBLL.GetList(f =>  f.FechaCreacion.Date <= fechaHasta);
+            lista = ProductosEmpacadosBLL.GetList(f =>  f.FechaCreacion.Date <= fechaHasta);
         else if(fechaDesde.HasValue || fechaHasta.HasValue)
-            lista = productosEmpacadosBLL.GetList(f => f.FechaCreacion.Date >= fechaDesde && f.FechaCreacion.Date <= fechaHasta);
+            lista = ProductosEmpacadosBLL.GetList(f => f.FechaCreacion.Date >= fechaDesde && f.FechaCreacion.Date <= fechaHasta);
     }
 
 }

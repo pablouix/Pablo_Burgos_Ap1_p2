@@ -1,7 +1,6 @@
 
-
-
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Pablo_Burgos_Ap1_p2.DAL;
 using Pablo_Burgos_Ap1_p2.Entidades;
@@ -10,14 +9,14 @@ namespace Pablo_Burgos_Ap1_p2.BLL
 {
     public class ProductosEmpacadosBLL
     {
-        private Contexto _contexto;
-
+        private static Contexto _contexto;
+        
         public ProductosEmpacadosBLL(Contexto contexto)
         {
             _contexto = contexto;
         }
 
-        private bool Existe(int id)
+        private static bool Existe(int id)
         {
             bool paso = false;
 
@@ -32,7 +31,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             }
             return paso;
         }
-        public bool Guardar(ProductosEmpacados productosEmpacados)
+        public static bool Guardar(ProductosEmpacados productosEmpacados)
         {
             if (Existe(productosEmpacados.ProductoEmpacadosId))
                 return Modificar(productosEmpacados);
@@ -40,7 +39,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
                 return Insertar(productosEmpacados);
         }
 
-        private bool Insertar(ProductosEmpacados productosEmpacados)
+        private static bool Insertar(ProductosEmpacados productosEmpacados)
         {
             bool paso = false;
 
@@ -48,65 +47,58 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             {
                 _contexto.ProductosEmpacados.Add(productosEmpacados);
 
-                foreach (var detalle in productosEmpacados.ProductosEmpacadosDetalle)
+                List<ProductosEmpacadosDetalle> productosEmpacadosDetalles = productosEmpacados.ProductosEmpacadosDetalle;
+                foreach (var item in productosEmpacadosDetalles)
                 {
-                    _contexto.Entry(detalle).State = EntityState.Added;
-                   // _contexto.Entry(detalle._producto).State = EntityState.Modified;
-
-                    //detalle._producto.Existencia -= detalle.Cantidad;
-
+                    Productos producto = ProductosBLL.Buscar(item.IdProducto);
+                    producto.Existencia -= item.Cantidad;
+                    //ProductosBLL.Guardar(producto);
                 }
+                Productos productos = ProductosBLL.Buscar(productosEmpacados.IdProducidos);
+                productos.Existencia += productosEmpacados.cantidadProducidos;
+                //ProductosBLL.Guardar(productos);
 
-                var producto = _contexto.Productos.Find(productosEmpacados.ProductoEmpacadosId).Existencia += productosEmpacados.cantidadProducidos;
                 paso = _contexto.SaveChanges() > 0;
-
             }
             catch (Exception)
             {
                 throw;
-
             }
-
-            var producido = _contexto.Productos.Find(productosEmpacados.ProductoEmpacadosId).Existencia += productosEmpacados.cantidadProducidos;
-
-
             return paso;
         }
 
-        private bool Modificar(ProductosEmpacados productosEmpacados)
+        private static bool Modificar(ProductosEmpacados productosEmpacados)
         {
             bool paso = false;
 
             try
             {
-
                 var entradaAnterior = _contexto.ProductosEmpacados.Where(x => x.ProductoEmpacadosId == productosEmpacados.ProductoEmpacadosId)
                 .Include(x => x.ProductosEmpacadosDetalle)
-               // .ThenInclude(x => x._producto)
-                .AsNoTracking()
+                //.AsNoTracking()
                 .SingleOrDefault();
 
-                foreach (var detalle in entradaAnterior.ProductosEmpacadosDetalle)
+                foreach (var item in entradaAnterior.ProductosEmpacadosDetalle) //ojo entradaAnterior.ProductosEmpacadosDetalle
                 {
-                    //detalle._producto.Existencia += detalle.Cantidad;
+                    Productos producto = ProductosBLL.Buscar(item.IdProducto);
+                    producto.Existencia -= item.Cantidad;
+                    //ProductosBLL.Guardar(producto);
+                }
+                Productos productosAnterior = ProductosBLL.Buscar(entradaAnterior.IdProducidos);
+                productosAnterior.Existencia -= entradaAnterior.cantidadProducidos;
+                //ProductosBLL.Guardar(productosAnterior);
+
+                List<ProductosEmpacadosDetalle> productosEmpacadosDetalles = productosEmpacados.ProductosEmpacadosDetalle;
+                foreach (var item in productosEmpacadosDetalles)
+                {
+                    Productos producto = ProductosBLL.Buscar(item.IdProducto);
+                    producto.Existencia += item.Cantidad;
+                    //ProductosBLL.Guardar(producto);
                 }
 
-                var producido = _contexto.Productos.Find(productosEmpacados.ProductoEmpacadosId).Existencia -= productosEmpacados.cantidadProducidos;
-
-
-
-
-
-                // _contexto.Database.ExecuteSqlRaw($"Delete FROM ProductoDetalles where ProductoId={productoEmpacados.ProductoId}");
-
-                foreach (var item in productosEmpacados.ProductosEmpacadosDetalle) 
-                {
-
-                    _contexto.Entry(item).State = EntityState.Added;
-                    //_contexto.Entry(item._producto).State = EntityState.Modified;
-
-                    //item._producto.Existencia -= item.Cantidad;
-                }
+                Productos productos = ProductosBLL.Buscar(productosEmpacados.IdProducidos);
+                productos.Existencia += productosEmpacados.cantidadProducidos;
+                //ProductosBLL.Guardar(productos);
 
                 _contexto.Entry(productosEmpacados).State = EntityState.Modified;
                 paso = _contexto.SaveChanges() > 0;
@@ -120,14 +112,18 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             return paso;
         }
 
-        public ProductosEmpacados Buscar(int id)
+        public static ProductosEmpacados Buscar(int id)
         {
             ProductosEmpacados productosEmpacados;
 
             try
             {
-                productosEmpacados = _contexto.ProductosEmpacados.Include(x => x.ProductosEmpacadosDetalle).Where(p => p.ProductoEmpacadosId == id).SingleOrDefault();
-            }
+                productosEmpacados = _contexto.ProductosEmpacados
+                            .Include(x => x.ProductosEmpacadosDetalle)
+                            .Where(p => p.ProductoEmpacadosId == id)
+                            //.AsNoTracking()
+                            .SingleOrDefault();
+            } 
             catch (Exception)
             {
                 throw;
@@ -135,8 +131,8 @@ namespace Pablo_Burgos_Ap1_p2.BLL
 
             return productosEmpacados;
         }
-
-        public bool Eliminar(int id)
+            //reparar ojo 
+        public static bool Eliminar(int id)
         {
             bool paso = false;
 
@@ -146,6 +142,18 @@ namespace Pablo_Burgos_Ap1_p2.BLL
 
                 if (productosEmpacados != null)
                 {
+
+                    List<ProductosEmpacadosDetalle> productosEmpacadosDetalles = productosEmpacados.ProductosEmpacadosDetalle;
+
+                    foreach (var item in productosEmpacadosDetalles)
+                    {
+                        Productos producto = ProductosBLL.Buscar(item.IdProducto);
+                        producto.Existencia += item.Cantidad;
+                    }
+
+                    Productos productos = ProductosBLL.Buscar(productosEmpacados.IdProducidos);
+                    productos.Existencia -= productosEmpacados.cantidadProducidos;
+
                     _contexto.ProductosEmpacados.Remove(productosEmpacados);
                     paso = _contexto.SaveChanges() > 0;
                 }
@@ -157,10 +165,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             }
             return paso;
         }
-
-
-        
-        public List<ProductosEmpacados> GetList(Expression<Func<ProductosEmpacados, bool>> criterio)
+        public static List<ProductosEmpacados> GetList(Expression<Func<ProductosEmpacados, bool>> criterio)
         {
             List<ProductosEmpacados> lista = new List<ProductosEmpacados>();
             try

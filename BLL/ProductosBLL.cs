@@ -8,14 +8,13 @@ namespace Pablo_Burgos_Ap1_p2.BLL
 {
     public class ProductosBLL
     {
-        private Contexto _contexto;
-
+        private static Contexto _contexto;
         public ProductosBLL(Contexto contexto)
         {
             _contexto = contexto;
         }
 
-        private bool Existe(int id)
+        private static bool Existe(int id)
         {
             bool paso = false;
 
@@ -31,7 +30,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             return paso;
         }
 
-        public bool Guardar(Productos producto)
+        public static bool Guardar(Productos producto)
         {
             if (Existe(producto.ProductoId))
                 return Modificar(producto);
@@ -39,19 +38,12 @@ namespace Pablo_Burgos_Ap1_p2.BLL
                 return Insertar(producto);
         }
 
-        private bool Modificar(Productos producto)
+        private static bool Modificar(Productos producto)
         {
             bool paso = false;
 
             try
             {
-              /*   _contexto.Database.ExecuteSqlRaw($"Delete FROM ProductoDetalle where ProductoId={producto.ProductosDetalle}");
-
-                foreach (var anterior in producto.ProductosDetalle)
-                {
-                    _contexto.Entry(anterior).State = EntityState.Added;
-                } */
-
                 _contexto.Entry(producto).State = EntityState.Modified;
                 paso = _contexto.SaveChanges() > 0;
             }
@@ -64,14 +56,13 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             return paso;
         }
 
-        private bool Insertar(Productos producto)
+        private static bool Insertar(Productos producto)
         {
             bool paso = false;
 
             try
             {
                 _contexto.Productos.Add(producto);
-
                 paso = _contexto.SaveChanges() > 0;
 
             }
@@ -85,15 +76,17 @@ namespace Pablo_Burgos_Ap1_p2.BLL
         }
 
 
-        public Productos Buscar(int id)
+        public static Productos Buscar(int id)
         {
             Productos producto;
 
             try
             {
-
-                producto = _contexto.Productos.Include(x => x.ProductosDetalle).Where(p => p.ProductoId == id).SingleOrDefault();
-
+                producto = _contexto.Productos
+                            .Include(x => x.ProductosDetalles)
+                            .Where(p => p.ProductoId == id)
+                            //.AsNoTracking()
+                            .SingleOrDefault();
             }
             catch (Exception)
             {
@@ -102,13 +95,13 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             return producto;
         }
 
-        public Productos BuscarDescripcion(string descripcion)
+        public static Productos BuscarDescripcion(string descripcion)
         {
             Productos productos;
 
             try
             {
-                productos = _contexto.Productos.Include(x => x.ProductosDetalle).Where(p => p.Descripcion == descripcion).SingleOrDefault();
+                productos = _contexto.Productos.Include(x => x.ProductosDetalles).Where(p => p.Descripcion == descripcion).SingleOrDefault();
             }
             catch (Exception)
             {
@@ -118,7 +111,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
         }
 
 
-        public bool Eliminar(int id)
+        public static bool Eliminar(int id)
         {
             bool paso = false;
 
@@ -140,12 +133,12 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             return paso;
         }
 
-        public List<Productos> GetList(Expression<Func<Productos, bool>> criterio)
+        public static List<Productos> GetList(Expression<Func<Productos, bool>> criterio)
         {
             List<Productos> lista = new List<Productos>();
             try
             {
-                lista = _contexto.Productos.Where(criterio).ToList();
+                lista = _contexto.Productos.Where(criterio).AsNoTracking().ToList();
 
             }
             catch (Exception)
@@ -154,23 +147,7 @@ namespace Pablo_Burgos_Ap1_p2.BLL
             }
             return lista;
         }
-           public List<ProductosDetalle> GetListaDetalle()
-           {
-               List<ProductosDetalle> lista = new List<ProductosDetalle>();
-               try
-               {
-                   lista = _contexto.ProductosDetalles.ToList();
-                   //lista = _contexto.ProductosDetalles.Where(criterio).ToList();
-
-               }
-               catch (Exception)
-               {
-                   throw;
-               }
-               return lista;
-           }
-
-        public List<Productos> GetListaProductos()
+        public static List<Productos> GetListaProductos()
         {
             List<Productos> lista = new List<Productos>();
             try
